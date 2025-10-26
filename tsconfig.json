@@ -6,8 +6,8 @@
     "paths": {
       "@app/*": ["src/app/*"],
       "@shared/*": ["src/shared/*"],
-      "@lib/*": ["src/lib/*"],
       "@screens/*": ["src/screens/*"], 
+      "@providers/*": ["src/providers/*"], 
     }
   },
   "include": [

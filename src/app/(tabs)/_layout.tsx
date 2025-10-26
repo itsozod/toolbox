@@ -37,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="fighter-jet" color={color} />
+            <TabBarIcon name="cog" color={color} />
           ),
         }}
       />
