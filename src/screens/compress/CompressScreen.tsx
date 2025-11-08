@@ -1,7 +1,7 @@
 import { useCompressedStore } from "@shared/store/useCompressStore";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
-import { Button, Image, ScrollView, Text, View } from "tamagui";
+import { Button, Image, ScrollView, Slider, Text, View } from "tamagui";
 import { Image as ImageCompressor } from "react-native-compressor";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
@@ -13,7 +13,18 @@ import { ActiveState, QualityLevels } from "@shared/types/qualityLevels";
 const qualityLevels: Record<QualityLevels, number> = {
   low: 0.9,
   medium: 0.5,
-  high: 0.2,
+  high: 0.3,
+};
+
+const slideLevels: Record<number, QualityLevels> = {
+  30: "low",
+  50: "medium",
+  70: "high",
+};
+const stateLevels: Record<QualityLevels, number> = {
+  low: 30,
+  medium: 50,
+  high: 70,
 };
 
 const saveCompressedImage = async (compressedUri: string) => {
@@ -54,12 +65,22 @@ const CompressScreen = () => {
   } = useCompressedStore();
 
   const [activeState, setActiveState] = useState<ActiveState>("idle");
+  const [sliderValue, setSliderValue] = useState({
+    sliderStart: 50,
+    sliderEnd: 50,
+  });
 
-  const imageCompress = async (uri: string, selectedQuality: QualityLevels) => {
+  const imageCompress = async (
+    uri: string,
+    selectedQuality: QualityLevels | number
+  ) => {
     try {
       const compressedUri = await ImageCompressor.compress(uri, {
         compressionMethod: "auto",
-        quality: qualityLevels[selectedQuality],
+        quality:
+          typeof selectedQuality === "number"
+            ? selectedQuality
+            : qualityLevels[selectedQuality],
       });
 
       const compressedInfo = await FileSystem.getInfoAsync(compressedUri);
@@ -74,16 +95,37 @@ const CompressScreen = () => {
 
   const handleStateAndCompress = async (state: QualityLevels) => {
     setActiveState(state);
+    setSliderValue((prev) => ({ ...prev, sliderStart: stateLevels[state] }));
     await imageCompress(originalImg, state);
   };
 
   useEffect(() => {
+    imageCompress(compressImg, "medium");
+    setActiveState("medium");
     return () => {
       setActiveState("idle");
       setCompressSizes({ before: "", after: "" });
       setCompressImg("");
     };
   }, []);
+
+  const handleSlideEnd = async (value: number) => {
+    const rounded = Math.round(value);
+    setSliderValue((prev) => ({
+      ...prev,
+      sliderEnd: rounded,
+    }));
+    let invertedQuality = Number((1 - rounded / 100).toFixed(2));
+
+    invertedQuality = Math.min(Math.max(invertedQuality, 0), 1);
+
+    if (slideLevels[rounded]) {
+      setActiveState(slideLevels[rounded]);
+    } else {
+      setActiveState("idle");
+    }
+    await imageCompress(originalImg, invertedQuality);
+  };
 
   return (
     <ScrollView>
@@ -100,6 +142,29 @@ const CompressScreen = () => {
             activeState={activeState}
             handleStateAndCompress={handleStateAndCompress}
           />
+        </View>
+
+        <View style={styles.slider_container}>
+          <Text>{sliderValue.sliderStart}%</Text>
+          <Slider
+            style={{ width: "100%" }}
+            value={[sliderValue.sliderStart]}
+            onSlideEnd={(_, value) => handleSlideEnd(value)}
+            onValueChange={(value) =>
+              setSliderValue((prev) => ({
+                ...prev,
+                sliderStart: value[0],
+              }))
+            }
+            min={1}
+            max={100}
+            step={1}
+          >
+            <Slider.Track>
+              <Slider.TrackActive />
+            </Slider.Track>
+            <Slider.Thumb size="$2" index={0} circular />
+          </Slider>
         </View>
 
         <Button
@@ -131,6 +196,13 @@ const styles = StyleSheet.create({
     width: "100%",
     flex: 1,
     flexDirection: "row",
+  },
+  slider_container: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+    padding: 15,
   },
   image: {
     width: "auto",
