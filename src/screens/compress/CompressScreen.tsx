@@ -35,7 +35,14 @@ const saveCompressedImage = async (compressedUri: string) => {
       return;
     }
 
-    const asset = await MediaLibrary.createAssetAsync(compressedUri);
+    const newUri = FileSystem.documentDirectory + `myapp_${Date.now()}.jpg`;
+
+    await FileSystem.copyAsync({
+      from: compressedUri,
+      to: newUri,
+    });
+
+    const asset = await MediaLibrary.createAssetAsync(newUri);
     await MediaLibrary.createAlbumAsync("MyApp", asset, false);
     Notifier.showNotification({
       title: "Image saved successfully",
@@ -43,12 +50,18 @@ const saveCompressedImage = async (compressedUri: string) => {
       componentProps: {
         alertType: "success",
       },
+      containerStyle: {
+        top: 50,
+      },
     });
   } catch (error) {
     Notifier.showNotification({
       title: "Failed",
       description: "Error saving compressed image" + error,
       Component: NotifierComponents.Alert,
+      containerStyle: {
+        top: 50,
+      },
       componentProps: {
         alertType: "error",
       },

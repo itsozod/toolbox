@@ -49,7 +49,7 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="compress/compress"
+          name="tools/[name]"
           options={{ presentation: "modal", title: "" }}
         />
       </Stack>

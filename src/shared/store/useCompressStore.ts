@@ -5,16 +5,18 @@ interface CompressSizes {
   after?: string;
 }
 
-interface CompressState {
+interface State {
   originalImg: string;
   compressImg: string;
   compressSizes: CompressSizes;
-  setCompressImg: (img: string) => void;
-  setOriginalImg: (img: string) => void;
-  setCompressSizes: (sizes: Partial<CompressSizes>) => void;
+}
+interface Actions {
+  setCompressImg: (compressImg: State["compressImg"]) => void;
+  setOriginalImg: (originalImg: State["compressImg"]) => void;
+  setCompressSizes: (sizes: Partial<State["compressSizes"]>) => void;
 }
 
-export const useCompressedStore = create<CompressState>((set) => ({
+export const useCompressedStore = create<State & Actions>((set) => ({
   originalImg: "",
   compressImg: "",
   compressSizes: {

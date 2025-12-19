@@ -13,7 +13,7 @@ const PhotoTools = () => {
   const { setCompressImg, setOriginalImg, setCompressSizes } =
     useCompressedStore();
 
-  const pickImage = async () => {
+  const pickImage = async (selectedTool: string) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -27,7 +27,7 @@ const PhotoTools = () => {
       setCompressSizes({ before: originalSizeMB });
       setCompressImg(originalUri);
       setOriginalImg(originalUri);
-      router.push("/compress/compress");
+      router.push(`/tools/${selectedTool}`);
     }
   };
 
@@ -44,18 +44,19 @@ const PhotoTools = () => {
         style={{
           flexDirection: "row",
           flexWrap: "wrap",
-          gap: 5,
+          gap: 10,
           justifyContent: "space-between",
         }}
       >
         <Button
-          p="$5"
+          flex={1}
+          p="$4"
           gap="$1"
           size="$8"
           items="center"
           justify="center"
           flexDirection="column"
-          onPress={pickImage}
+          onPress={() => pickImage("compress")}
         >
           <ImageUpscale
             color={colorScheme === "dark" ? "#fff" : "#000"}
@@ -64,12 +65,14 @@ const PhotoTools = () => {
           <Text>Compress</Text>
         </Button>
         <Button
-          p="$5"
+          flex={1}
+          p="$4"
           gap="$1"
           size="$8"
           items="center"
           justify="center"
           flexDirection="column"
+          onPress={() => pickImage("convert")}
         >
           <RefreshCcwDot
             color={colorScheme === "dark" ? "#fff" : "#000"}
@@ -79,7 +82,8 @@ const PhotoTools = () => {
         </Button>
 
         <Button
-          p="$5"
+          flex={1}
+          p="$4"
           gap="$1"
           size="$8"
           items="center"
