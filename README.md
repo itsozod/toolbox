@@ -4,8 +4,6 @@ A multifunctional React Native app that provides useful tools such as image comp
 
 🚀 Features
 
-List what your app currently does and what you plan to add:
-
 🖼️ Image Compressor — Compress images with adjustable quality levels (low, medium, high)
 
 💾 Local Save Support — Save compressed images to device storage
