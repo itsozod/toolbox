@@ -1,14 +1,13 @@
+import * as FileSystem from "expo-file-system/legacy";
+import QualityButtons from "./ui/QualityButtons";
 import { useCompressedStore } from "@shared/store/useCompressStore";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { Button, Image, ScrollView, Slider, Text, View } from "tamagui";
 import { Image as ImageCompressor } from "react-native-compressor";
-import * as FileSystem from "expo-file-system/legacy";
-import * as MediaLibrary from "expo-media-library";
 import { Save } from "lucide-react-native";
-import { Notifier, NotifierComponents } from "react-native-notifier";
-import QualityButtons from "./ui/QualityButtons";
-import { ActiveState, QualityLevels } from "@shared/types/qualityLevels";
+import { ActiveState, QualityLevels } from "@shared/types/quality-levels.types";
+import { saveImage } from "@shared/utils/save-image";
 
 const qualityLevels: Record<QualityLevels, number> = {
   low: 0.9,
@@ -27,47 +26,6 @@ const stateLevels: Record<QualityLevels, number> = {
   high: 70,
 };
 
-const saveCompressedImage = async (compressedUri: string) => {
-  try {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission not granted");
-      return;
-    }
-
-    const newUri = FileSystem.documentDirectory + `myapp_${Date.now()}.jpg`;
-
-    await FileSystem.copyAsync({
-      from: compressedUri,
-      to: newUri,
-    });
-
-    const asset = await MediaLibrary.createAssetAsync(newUri);
-    await MediaLibrary.createAlbumAsync("MyApp", asset, false);
-    Notifier.showNotification({
-      title: "Image saved successfully",
-      Component: NotifierComponents.Alert,
-      componentProps: {
-        alertType: "success",
-      },
-      containerStyle: {
-        top: 50,
-      },
-    });
-  } catch (error) {
-    Notifier.showNotification({
-      title: "Failed",
-      description: "Error saving compressed image" + error,
-      Component: NotifierComponents.Alert,
-      containerStyle: {
-        top: 50,
-      },
-      componentProps: {
-        alertType: "error",
-      },
-    });
-  }
-};
 const CompressScreen = () => {
   const {
     originalImg,
@@ -97,16 +55,20 @@ const CompressScreen = () => {
       });
 
       const compressedInfo = await FileSystem.getInfoAsync(compressedUri);
-      const compressedSizeMB = (compressedInfo.size / (1024 * 1024)).toFixed(2);
-
-      setCompressSizes({ after: compressedSizeMB });
-      setCompressImg(compressedUri);
+      if (compressedInfo.exists && !compressedInfo.isDirectory) {
+        const compressedSizeMB = (compressedInfo.size / (1024 * 1024)).toFixed(
+          2
+        );
+        setCompressSizes({ after: compressedSizeMB });
+        setCompressImg(compressedUri);
+      }
     } catch (error) {
       console.log("ERROR");
     }
   };
 
   const handleStateAndCompress = async (state: QualityLevels) => {
+    if (activeState === state) return;
     setActiveState(state);
     setSliderValue((prev) => ({ ...prev, sliderStart: stateLevels[state] }));
     await imageCompress(originalImg, state);
@@ -144,12 +106,16 @@ const CompressScreen = () => {
     <ScrollView>
       <View style={styles.container}>
         <Image source={{ uri: compressImg }} style={styles.image} />
-        {compressSizes.after && (
-          <View style={styles.compress_sizes_container}>
-            <Text color={"$red11"}>Before: {compressSizes.before} MB</Text>
-            <Text color={"$blue11"}>After: {compressSizes.after} MB</Text>
-          </View>
-        )}
+
+        <View style={styles.compress_sizes_container}>
+          {compressSizes.after && (
+            <>
+              <Text color={"$red11"}>Before: {compressSizes.before} MB</Text>
+              <Text color={"$blue11"}>After: {compressSizes.after} MB</Text>
+            </>
+          )}
+        </View>
+
         <View style={styles.quality_container}>
           <QualityButtons
             activeState={activeState}
@@ -183,7 +149,7 @@ const CompressScreen = () => {
         <Button
           theme={"green"}
           icon={<Save size={20} />}
-          onPress={() => saveCompressedImage(compressImg)}
+          onPress={() => saveImage(compressImg)}
         >
           Save
         </Button>
@@ -203,6 +169,7 @@ const styles = StyleSheet.create({
   compress_sizes_container: {
     flexDirection: "row",
     justifyContent: "flex-end",
+    height: 20,
     gap: 10,
   },
   quality_container: {

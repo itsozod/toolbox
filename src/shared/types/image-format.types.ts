@@ -1,0 +1,1 @@
+export type ImageFormat = "PNG" | "JPEG" | "WEBP";

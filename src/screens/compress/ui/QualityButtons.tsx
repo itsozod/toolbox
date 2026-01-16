@@ -1,4 +1,4 @@
-import { ActiveState, QualityLevels } from "@shared/types/qualityLevels";
+import { ActiveState, QualityLevels } from "@shared/types/quality-levels.types";
 import { Button } from "tamagui";
 
 const QualityButtons = ({
