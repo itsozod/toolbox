@@ -8,6 +8,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 
 const PhotoTools = () => {
+
   const colorScheme = useColorScheme();
   const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
   const { setCompressImg, setOriginalImg, setCompressSizes } =
@@ -23,8 +24,12 @@ const PhotoTools = () => {
     if (!result.canceled) {
       const originalUri = result.assets?.[0]?.uri;
       const originalInfo = await FileSystem.getInfoAsync(originalUri);
-      const originalSizeMB = (originalInfo.size / (1024 * 1024)).toFixed(2);
-      setCompressSizes({ before: originalSizeMB });
+      
+      if (originalInfo.exists && !originalInfo.isDirectory) {
+        const originalSizeMB = (originalInfo.size / (1024 * 1024)).toFixed(2);
+        setCompressSizes({ before: originalSizeMB });
+      }
+      
       setCompressImg(originalUri);
       setOriginalImg(originalUri);
       router.push(`/tools/${selectedTool}`);
@@ -62,7 +67,7 @@ const PhotoTools = () => {
             color={colorScheme === "dark" ? "#fff" : "#000"}
             size={28}
           />
-          <Text>Compress</Text>
+          <Text fontSize="$5">Compress</Text>
         </Button>
         <Button
           flex={1}
@@ -79,22 +84,6 @@ const PhotoTools = () => {
             size={28}
           />
           <Text fontSize="$5">Convert</Text>
-        </Button>
-
-        <Button
-          flex={1}
-          p="$4"
-          gap="$1"
-          size="$8"
-          items="center"
-          justify="center"
-          flexDirection="column"
-        >
-          <RefreshCcwDot
-            color={colorScheme === "dark" ? "#fff" : "#000"}
-            size={28}
-          />
-          <Text>Convert</Text>
         </Button>
       </View>
     </View>

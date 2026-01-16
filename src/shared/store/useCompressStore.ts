@@ -16,13 +16,18 @@ interface Actions {
   setCompressSizes: (sizes: Partial<State["compressSizes"]>) => void;
 }
 
-export const useCompressedStore = create<State & Actions>((set) => ({
+
+const initialState: State = {
   originalImg: "",
   compressImg: "",
   compressSizes: {
     before: "",
     after: "",
   },
+}
+
+export const useCompressedStore = create<State & Actions>((set) => ({
+  ...initialState,
   setOriginalImg: (img) => set({ originalImg: img }),
   setCompressImg: (img) => set({ compressImg: img }),
   setCompressSizes: (sizes) =>
