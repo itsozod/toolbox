@@ -12,8 +12,6 @@ const QualityButtons = ({
     <>
       <Button
         flex={1}
-        borderTopEndRadius={"$0"}
-        borderBottomEndRadius={"$0"}
         borderColor={"$color02"}
         theme={activeState === "low" ? "green" : "dark"}
         onPress={() => handleStateAndCompress("low")}
@@ -23,20 +21,14 @@ const QualityButtons = ({
       <Button
         flex={1}
         borderColor={"$color02"}
-        borderTopLeftRadius={"$0"}
-        borderBottomLeftRadius={"$0"}
-        borderTopEndRadius={"$0"}
-        borderBottomEndRadius={"$0"}
         theme={activeState === "medium" ? "green" : "dark"}
         onPress={() => handleStateAndCompress("medium")}
       >
         Medium
       </Button>
       <Button
-        borderColor={"$color02"}
         flex={1}
-        borderTopLeftRadius={"$0"}
-        borderBottomLeftRadius={"$0"}
+        borderColor={"$color02"}
         theme={activeState === "high" ? "green" : "dark"}
         onPress={() => handleStateAndCompress("high")}
       >

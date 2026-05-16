@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
   quality_container: {
     width: "100%",
     flex: 1,
+    gap: 5,
     flexDirection: "row",
   },
   slider_container: {
